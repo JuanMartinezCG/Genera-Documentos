@@ -2,25 +2,16 @@ from docx import Document
 from datetime import datetime
 import os
 
+MESES_ES = {
+    1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
+    5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
+    9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+    }
+
 def generar_documento_word(datos_cliente: dict, nombre_salida: str):
     """Genera un documento de Word a partir de una plantilla y datos del cliente."""
 
     # Mapeo de meses en español
-    MESES_ES = {
-    1: "Enero",
-    2: "Febrero",
-    3: "Marzo",
-    4: "Abril",
-    5: "Mayo",
-    6: "Junio",
-    7: "Julio",
-    8: "Agosto",
-    9: "Septiembre",
-    10: "Octubre",
-    11: "Noviembre",
-    12: "Diciembre"
-    }
-
     fecha_actual = datetime.now()
 
     datos_cliente = datos_cliente.copy()
