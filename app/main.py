@@ -1,5 +1,6 @@
 from clientes import cargar_datos_clientes
 from selector_clientes import preparar_opciones_clientes
+from word_generator import generar_documento_word
 
 clientes = cargar_datos_clientes()
 
@@ -21,5 +22,16 @@ else:
         print("==============================")
         print(opcion)
         print("==============================")
+
+
+# Tomamos el primer cliente como prueba
+cliente = list(opciones.values())[0]
+
+generar_documento_word(
+    datos_cliente=cliente,
+    nombre_salida="documento_generado.docx"
+)
+
+print("Documento generado correctamente.")
 
 
