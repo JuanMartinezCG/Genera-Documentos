@@ -5,6 +5,7 @@ import os
 def generar_documento_word(datos_cliente: dict, nombre_salida: str):
     """Genera un documento de Word a partir de una plantilla y datos del cliente."""
 
+    # Mapeo de meses en español
     MESES_ES = {
     1: "Enero",
     2: "Febrero",
@@ -27,21 +28,27 @@ def generar_documento_word(datos_cliente: dict, nombre_salida: str):
     datos_cliente["MES"] = MESES_ES[fecha_actual.month]
     datos_cliente["ANIO"] = str(fecha_actual.year)
 
+    # Ruta de la plantilla de Word
     base_dir = os.path.dirname(os.path.abspath(__file__)) # Directorio base del script
     ruta_plantilla = os.path.join(base_dir, "plantilla.docx") # Ruta de la plantilla de Word
 
     doc = Document(ruta_plantilla) # Cargar la plantilla de Word
 
     def reemplazar_texto_en_parrafo(parrafo, datos):
-        for clave, valor in datos.items(): # Iterar sobre cada par clave-valor en los datos del cliente
-            marcador = f"{{{{{clave}}}}}" # Formatear el marcador de posición
-            if marcador in parrafo.text: # Si el marcador está en el texto del párrafo
-                parrafo.text = parrafo.text.replace( # lo remplazamos
-                    marcador, 
-                    str(valor)
-                )
+        texto_completo = "".join(run.text for run in parrafo.runs) # Texto completo del párrafo
 
-    # Texto normal
+        for clave, valor in datos.items(): # Iterar sobre cada clave y valor en los datos del cliente
+            marcador = f"{{{{{clave}}}}}" # Formatear el marcador a buscar
+            if marcador in texto_completo: # Si el marcador está en el texto del párrafo
+                texto_completo = texto_completo.replace(marcador, str(valor)) # Reemplazar el marcador con el valor correspondiente
+
+        if texto_completo != "".join(run.text for run in parrafo.runs): # Si hubo un cambio en el texto
+            for run in parrafo.runs: # Limpiar el texto de todos los runs
+                run.text = "" # Vaciar el texto del run
+            parrafo.runs[0].text = texto_completo # Asignar el texto completo al primer run
+
+
+    # Reemplazo de marcadores en el documento
     for parrafo in doc.paragraphs: # Iterar sobre cada párrafo en el documento
         reemplazar_texto_en_parrafo(parrafo, datos_cliente)
 
