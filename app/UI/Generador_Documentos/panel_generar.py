@@ -226,14 +226,23 @@ class PanelGenerarDocumento(ttk.Frame):
 
         for idx in self.documentos_seleccionados:
             nombre_doc = self.documentos[idx]
-        
+
             ruta_base = os.path.join(os.getcwd(), "Documentos", nombre_doc)
-        
-            empresa = cliente.get("NOMBRE_EMPRESA", "cliente").replace(" ", "_")
-            salida = f"{empresa}_{nombre_doc}"
-        
-            ruta_salida = os.path.join(self.parent.carpeta_salida, salida)
-        
+
+            empresa = cliente.get("NOMBRE_EMPRESA", "cliente").replace(" ", "_") # Parte del nombre de archivo
+            salida = f"{empresa}_{nombre_doc}" # Nombre de archivo de salida
+
+            ruta_salida = os.path.join(self.parent.carpeta_salida, salida) # Ruta completa de salida
+
+            # confirmación de sobrescritura
+            if os.path.exists(ruta_salida):
+                respuesta = messagebox.askyesno(
+                    "Archivo existente",
+                    f"El archivo:\n\n{salida}\n\nya existe.\n¿Desea sobrescribirlo?"
+                )
+                if not respuesta:
+                    continue  # Saltar este documento
+                
             generar_documento_word(
                 ruta_documento_base=ruta_base,
                 ruta_salida=ruta_salida,
