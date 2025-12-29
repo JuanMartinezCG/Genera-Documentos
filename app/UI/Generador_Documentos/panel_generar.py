@@ -51,26 +51,26 @@ class PanelGenerarDocumento(ttk.Frame):
         style.configure("TLabel", background=self.COLOR_FONDO)
         
         style.configure("Titulo.TLabel", 
-                       font=("Segoe UI", 18, "bold"),
-                       foreground=self.COLOR_PRIMARIO)
+                    font=("Segoe UI", 18, "bold"),
+                    foreground=self.COLOR_PRIMARIO)
         
         style.configure("Subtitulo.TLabel",
-                       font=("Segoe UI", 12, "bold"),
-                       foreground=self.COLOR_SECUNDARIO)
+                    font=("Segoe UI", 12, "bold"),
+                    foreground=self.COLOR_SECUNDARIO)
         
         style.configure("Accion.TButton",
-                       font=("Segoe UI", 10),
-                       padding=8)
+                    font=("Segoe UI", 10),
+                    padding=8)
         
         style.configure("Primary.TButton",
-                       font=("Segoe UI", 10, "bold"),
-                       foreground="white",
-                       background=self.COLOR_SECUNDARIO)
+                    font=("Segoe UI", 10, "bold"),
+                    foreground="white",
+                    background=self.COLOR_SECUNDARIO)
         
         style.configure("Card.TFrame",
-                       background=self.COLOR_TARJETA,
-                       relief="solid",
-                       borderwidth=1)
+                    background=self.COLOR_TARJETA,
+                    relief="solid",
+                    borderwidth=1)
     
     def _cargar_configuracion(self):
         """Carga configuración sin archivo externo"""
@@ -111,9 +111,9 @@ class PanelGenerarDocumento(ttk.Frame):
         
         # Info de estado
         self.lbl_estado = ttk.Label(frame_titulo, 
-                                   text="Listo",
-                                   foreground="gray",
-                                   font=("Segoe UI", 9))
+                                text="Listo",
+                                foreground="gray",
+                                font=("Segoe UI", 9))
         self.lbl_estado.pack(side="right")
         
         # Contenedor principal
@@ -167,11 +167,11 @@ class PanelGenerarDocumento(ttk.Frame):
         
         # Canvas y scrollbar
         canvas = tk.Canvas(frame_contenido, 
-                          bg=self.COLOR_FONDO, 
-                          highlightthickness=0)
+                        bg=self.COLOR_FONDO, 
+                        highlightthickness=0)
         scrollbar = ttk.Scrollbar(frame_contenido, 
-                                 orient="vertical", 
-                                 command=canvas.yview)
+                                orient="vertical", 
+                                command=canvas.yview)
         
         # Frame interno para los items
         inner_frame = ttk.Frame(canvas)
@@ -207,18 +207,18 @@ class PanelGenerarDocumento(ttk.Frame):
         
         # Botones secundarios
         ttk.Button(parent,
-                  text="🔄 Refrescar Datos",
-                  command=self._cargar_datos).pack(fill="x", pady=5)
+                text="🔄 Refrescar Datos",
+                command=self._cargar_datos).pack(fill="x", pady=5)
         
         ttk.Button(parent,
-                  text="📁 Elegir Carpeta de Salida",
-                  command=self._elegir_carpeta).pack(fill="x", pady=5)
+                text="📁 Elegir Carpeta de Salida",
+                command=self._elegir_carpeta).pack(fill="x", pady=5)
         
         # Botón para abrir carpeta
         self.btn_abrir_carpeta = ttk.Button(parent,
-                                           text="🔍 Abrir Carpeta",
-                                           command=self._abrir_carpeta_salida,
-                                           state="disabled")
+                                        text="🔍 Abrir Carpeta",
+                                        command=self._abrir_carpeta_salida,
+                                        state="disabled")
         self.btn_abrir_carpeta.pack(fill="x", pady=5)
         
         # Separador
@@ -226,8 +226,8 @@ class PanelGenerarDocumento(ttk.Frame):
         
         # Info de carpeta
         ttk.Label(parent,
-                 text="Carpeta de salida:",
-                 font=("Segoe UI", 9, "bold")).pack(anchor="w")
+                text="Carpeta de salida:",
+                font=("Segoe UI", 9, "bold")).pack(anchor="w")
         
         self.lbl_carpeta = ttk.Label(parent,
                                     text="No seleccionada",
@@ -238,19 +238,19 @@ class PanelGenerarDocumento(ttk.Frame):
         
         if self.parent.carpeta_salida:
             self.lbl_carpeta.config(text=self.parent.carpeta_salida, 
-                                   foreground="green")
+                                foreground="green")
             self.btn_abrir_carpeta.config(state="normal")
         
         # Contador de selección
         self.lbl_seleccion = ttk.Label(parent,
-                                      text="Cliente: Ninguno\nDocumentos: 0 seleccionados",
-                                      font=("Segoe UI", 9))
+                                    text="Cliente: Ninguno\nDocumentos: 0 seleccionados",
+                                    font=("Segoe UI", 9))
         self.lbl_seleccion.pack(anchor="w", pady=10)
         
         # Botón para limpiar
         ttk.Button(parent,
-                  text="🗑️ Limpiar Selección",
-                  command=self._limpiar_seleccion).pack(fill="x", pady=5)
+                text="🗑️ Limpiar Selección",
+                command=self._limpiar_seleccion).pack(fill="x", pady=5)
     
     def _configurar_bindings(self):
         """Configura los bindings globales"""
@@ -282,7 +282,7 @@ class PanelGenerarDocumento(ttk.Frame):
             carpeta_docs = os.path.join(os.getcwd(), "Documentos")
             os.makedirs(carpeta_docs, exist_ok=True)
             self.documentos = [f for f in os.listdir(carpeta_docs) 
-                             if f.lower().endswith(".docx")]
+                            if f.lower().endswith(".docx")]
             self._crear_items_documentos()
             
             # Actualizar contadores
@@ -294,13 +294,13 @@ class PanelGenerarDocumento(ttk.Frame):
             )
             
             self.lbl_estado.config(text="Datos cargados", 
-                                  foreground=self.COLOR_EXITO)
+                                foreground=self.COLOR_EXITO)
             self._actualizar_estado()
             
         except Exception as e:
             messagebox.showerror("Error", f"Error al cargar datos: {str(e)}")
             self.lbl_estado.config(text="Error al cargar datos", 
-                                  foreground=self.COLOR_PELIGRO)
+                                foreground=self.COLOR_PELIGRO)
     
     # --------------------------------------------------
     # CREAR ITEMS CON CLICK DERECHO
@@ -721,7 +721,7 @@ class PanelGenerarDocumento(ttk.Frame):
             if respuesta_final:
                 self._abrir_carpeta_salida()
         elif ya_existentes > 0 and respuesta == "saltar":
-            messagebox.showinfo("Información", "Todos los documentos ya existían y fueron saltados.")
+            messagebox.showinfo("Información", "Los documentos fueron saltados.")
         
         self.lbl_estado.config(text="Generación completada", 
                             foreground=self.COLOR_EXITO)
@@ -762,14 +762,14 @@ class PanelGenerarDocumento(ttk.Frame):
         frame_titulo.pack(side="left", fill="y")
         
         ttk.Label(frame_titulo,
-                 text=f"{cantidad_existentes} documento(s) ya existen",
-                 font=("Segoe UI", 12, "bold"),
-                 foreground="#2C3E50").pack(anchor="w")
+                text=f"{cantidad_existentes} documento(s) ya existen",
+                font=("Segoe UI", 12, "bold"),
+                foreground="#2C3E50").pack(anchor="w")
         
         ttk.Label(frame_titulo,
-                 text="Seleccione una acción:",
-                 font=("Segoe UI", 9),
-                 foreground="#7F8C8D").pack(anchor="w", pady=(2, 0))
+                text="Seleccione una acción:",
+                font=("Segoe UI", 9),
+                foreground="#7F8C8D").pack(anchor="w", pady=(2, 0))
         
         # Variable para resultado
         resultado = tk.StringVar(value="sobrescribir")
@@ -783,74 +783,74 @@ class PanelGenerarDocumento(ttk.Frame):
         
         # Opción 1: Sobrescribir
         radio1 = tk.Radiobutton(frame_opciones,
-                              variable=resultado,
-                              value="sobrescribir",
-                              bg=self.COLOR_FONDO,
-                              activebackground=self.COLOR_FONDO,
-                              cursor="hand2")
+                            variable=resultado,
+                            value="sobrescribir",
+                            bg=self.COLOR_FONDO,
+                            activebackground=self.COLOR_FONDO,
+                            cursor="hand2")
         radio1.grid(row=0, column=0, sticky="nw", padx=(0, 10), pady=(0, 15))
         
         lbl_opcion1 = tk.Label(frame_opciones,
-                             text="🔄  Sobrescribir existentes",
-                             font=("Segoe UI", 10, "bold"),
-                             bg=self.COLOR_FONDO,
-                             cursor="hand2")
+                            text="🔄  Sobrescribir existentes",
+                            font=("Segoe UI", 10, "bold"),
+                            bg=self.COLOR_FONDO,
+                            cursor="hand2")
         lbl_opcion1.grid(row=0, column=1, sticky="w", pady=(0, 5))
         
         lbl_desc1 = tk.Label(frame_opciones,
-                           text="Reemplazar los documentos que ya existen",
-                           font=("Segoe UI", 9),
-                           bg=self.COLOR_FONDO,
-                           fg="#666666",
-                           cursor="hand2")
+                        text="Reemplazar los documentos que ya existen",
+                        font=("Segoe UI", 9),
+                        bg=self.COLOR_FONDO,
+                        fg="#666666",
+                        cursor="hand2")
         lbl_desc1.grid(row=1, column=1, sticky="w", padx=(0, 0), pady=(0, 10))
         
         # Opción 2: Renombrar
         radio2 = tk.Radiobutton(frame_opciones,
-                              variable=resultado,
-                              value="renombrar",
-                              bg=self.COLOR_FONDO,
-                              activebackground=self.COLOR_FONDO,
-                              cursor="hand2")
+                            variable=resultado,
+                            value="renombrar",
+                            bg=self.COLOR_FONDO,
+                            activebackground=self.COLOR_FONDO,
+                            cursor="hand2")
         radio2.grid(row=2, column=0, sticky="nw", padx=(0, 10), pady=(0, 15))
         
         lbl_opcion2 = tk.Label(frame_opciones,
-                             text="📝  Renombrar automáticamente",
-                             font=("Segoe UI", 10, "bold"),
-                             bg=self.COLOR_FONDO,
-                             cursor="hand2")
+                            text="📝  Renombrar automáticamente",
+                            font=("Segoe UI", 10, "bold"),
+                            bg=self.COLOR_FONDO,
+                            cursor="hand2")
         lbl_opcion2.grid(row=2, column=1, sticky="w", pady=(0, 5))
         
         lbl_desc2 = tk.Label(frame_opciones,
-                           text="Agregar números para evitar duplicados",
-                           font=("Segoe UI", 9),
-                           bg=self.COLOR_FONDO,
-                           fg="#666666",
-                           cursor="hand2")
+                        text="Agregar números para evitar duplicados",
+                        font=("Segoe UI", 9),
+                        bg=self.COLOR_FONDO,
+                        fg="#666666",
+                        cursor="hand2")
         lbl_desc2.grid(row=3, column=1, sticky="w", padx=(0, 0), pady=(0, 10))
         
         # Opción 3: Saltar
         radio3 = tk.Radiobutton(frame_opciones,
-                              variable=resultado,
-                              value="saltar",
-                              bg=self.COLOR_FONDO,
-                              activebackground=self.COLOR_FONDO,
-                              cursor="hand2")
+                            variable=resultado,
+                            value="saltar",
+                            bg=self.COLOR_FONDO,
+                            activebackground=self.COLOR_FONDO,
+                            cursor="hand2")
         radio3.grid(row=4, column=0, sticky="nw", padx=(0, 10), pady=(0, 15))
         
         lbl_opcion3 = tk.Label(frame_opciones,
-                             text="⏭️  Saltar existentes",
-                             font=("Segoe UI", 10, "bold"),
-                             bg=self.COLOR_FONDO,
-                             cursor="hand2")
+                            text="⏭️  Saltar existentes",
+                            font=("Segoe UI", 10, "bold"),
+                            bg=self.COLOR_FONDO,
+                            cursor="hand2")
         lbl_opcion3.grid(row=4, column=1, sticky="w", pady=(0, 5))
         
         lbl_desc3 = tk.Label(frame_opciones,
-                           text="Generar solo documentos nuevos",
-                           font=("Segoe UI", 9),
-                           bg=self.COLOR_FONDO,
-                           fg="#666666",
-                           cursor="hand2")
+                        text="Generar solo documentos nuevos",
+                        font=("Segoe UI", 9),
+                        bg=self.COLOR_FONDO,
+                        fg="#666666",
+                        cursor="hand2")
         lbl_desc3.grid(row=5, column=1, sticky="w", padx=(0, 0), pady=(0, 10))
         
         # Funciones para seleccionar al hacer click en las etiquetas
@@ -890,10 +890,10 @@ class PanelGenerarDocumento(ttk.Frame):
         
         # Botón principal
         btn_continuar = ttk.Button(frame_botones,
-                                 text=f"Aplicar a {cantidad_existentes} documento(s)",
-                                 command=confirmar,
-                                 style="Primary.TButton",
-                                 width=25)
+                                text=f"Aplicar a {cantidad_existentes} documento(s)",
+                                command=confirmar,
+                                style="Primary.TButton",
+                                width=25)
         btn_continuar.pack(side="right", padx=(10, 0))
         
         # Botón cancelar
@@ -905,9 +905,9 @@ class PanelGenerarDocumento(ttk.Frame):
         
         # Etiqueta de atajos
         lbl_atajos = ttk.Label(frame_botones,
-                             text="Teclas: 1, 2, 3 | Enter, Esc",
-                             font=("Segoe UI", 8),
-                             foreground="gray")
+                            text="Teclas: 1, 2, 3 | Enter, Esc",
+                            font=("Segoe UI", 8),
+                            foreground="gray")
         lbl_atajos.pack(side="left", fill="y")
         
         # Atajos de teclado
