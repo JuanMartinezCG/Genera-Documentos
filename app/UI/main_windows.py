@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from UI.Generador_Documentos.panel_generar import PanelGenerarDocumento
+from UI.Clients import panel_clientes
 
 
 class MainWindow(tk.Tk):
@@ -346,9 +347,8 @@ class MainWindow(tk.Tk):
                 fg="#666666",
                 wraplength=200,
                 justify="left",
-                padx=20,
-                pady=(0, 20)
-            ).pack(anchor="w")
+                padx=20
+            ).pack(anchor="w", pady=(0, 20))
             
             # Bind para hacer click en toda la tarjeta
             frame_accion.bind("<Button-1>", lambda e, c=comando: c())
@@ -393,54 +393,27 @@ class MainWindow(tk.Tk):
                 bg="#F8F9FA",
                 fg="#666666",
                 justify="left",
-                padx=20,
-                pady=(0, 8)
-            ).pack(anchor="w")
+                padx=20
+            ).pack(anchor="w", pady=(0, 8)) 
     
     def _mostrar_generar(self):
         """Muestra el panel de generación de documentos"""
         self._limpiar_contenido()
         self.lbl_titulo.config(text="Generar Documentos")
         
-        # Actualizar estado de carpeta
-        self._actualizar_estado_carpeta()
-        
         panel = PanelGenerarDocumento(self.content)
         panel.pack(fill="both", expand=True, padx=30, pady=(0, 30))
         self.panel_activo = panel
     
+    # En tu MainWindow, en el método _mostrar_clientes:
     def _mostrar_clientes(self):
-        """Muestra el módulo de clientes (placeholder)"""
+        """Muestra el módulo de gestión de clientes"""
         self._limpiar_contenido()
         self.lbl_titulo.config(text="Gestión de Clientes")
-        
-        contenido_frame = ttk.Frame(self.content, style="Content.TFrame")
-        contenido_frame.pack(fill="both", expand=True, padx=50, pady=50)
-        
-        # Mensaje temporal
-        tk.Label(
-            contenido_frame,
-            text="👥 Módulo en Desarrollo",
-            font=("Segoe UI", 24, "bold"),
-            bg=self.COLOR_FONDO,
-            fg=self.COLOR_PRIMARIO
-        ).pack(pady=20)
-        
-        tk.Label(
-            contenido_frame,
-            text="Esta funcionalidad estará disponible próximamente",
-            font=("Segoe UI", 12),
-            bg=self.COLOR_FONDO,
-            fg="#666666"
-        ).pack()
-        
-        # Botón para volver a inicio
-        ttk.Button(
-            contenido_frame,
-            text="← Volver al Inicio",
-            command=self._mostrar_inicio,
-            style="Primary.TButton"
-        ).pack(pady=30)
+
+        panel = panel_clientes.PanelClientes(self.content)
+        panel.pack(fill="both", expand=True, padx=30, pady=(0, 30))
+        self.panel_activo = panel
     
     def _mostrar_documentos(self):
         """Muestra el módulo de plantillas (placeholder)"""
@@ -474,18 +447,3 @@ class MainWindow(tk.Tk):
             command=self._mostrar_inicio,
             style="Primary.TButton"
         ).pack(pady=30)
-    
-    def _actualizar_estado_carpeta(self):
-        """Actualiza el estado de la carpeta en el header"""
-        if self.carpeta_salida:
-            # Mostrar solo el nombre de la carpeta, no la ruta completa
-            carpeta_nombre = self.carpeta_salida.split("/")[-1].split("\\")[-1]
-            self.lbl_carpeta_estado.config(
-                text=f"📁 {carpeta_nombre}",
-                foreground=self.COLOR_SECUNDARIO
-            )
-        else:
-            self.lbl_carpeta_estado.config(
-                text="📁 Sin carpeta seleccionada",
-                foreground="#95A5A6"
-            )
