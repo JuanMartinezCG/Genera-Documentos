@@ -650,15 +650,54 @@ class PanelGenerarDocumento(ttk.Frame):
         
         exitosos = 0
         errores = 0
+        ya_existentes = 0
+        documentos_a_generar = []
         
+        # Primero verificar qué documentos ya existen
         for idx in self.documentos_seleccionados:
             doc = self.documentos[idx]
+            nombre_salida = f"{empresa}_{doc.replace('.docx', '')}.docx"
+            ruta_salida = os.path.join(self.parent.carpeta_salida, nombre_salida)
+            
+            if os.path.exists(ruta_salida):
+                ya_existentes += 1
+                documentos_a_generar.append((idx, doc, ruta_salida, True))  # True = ya existe
+            else:
+                documentos_a_generar.append((idx, doc, ruta_salida, False))  # False = no existe
+        
+        # Si hay documentos existentes, preguntar al usuario
+        if ya_existentes > 0:
+            mensaje_confirmacion = f"""
+            Se encontraron {ya_existentes} documento(s) que ya existen:
+            
+            ¿Qué desea hacer?
+            
+            Sobrescribir los existentes
+            Renombrar agregando número (ej: documento_1.docx)
+            Saltar los existentes y generar solo los nuevos
+            Cancelar la operación
+            """
+            
+            # Crear ventana de confirmación personalizada
+            respuesta = self._mostrar_dialogo_existentes(mensaje_confirmacion, ya_existentes)
+            
+            if respuesta is None:  # Cancelar
+                self.lbl_estado.config(text="Operación cancelada", foreground="orange")
+                return
+        else:
+            respuesta = "sobrescribir"  # Por defecto si no hay existentes
+        
+        # Procesar documentos según la opción seleccionada
+        for idx, doc, ruta_salida, existe in documentos_a_generar:
             ruta_base = os.path.join(os.getcwd(), "Documentos", doc)
             
-            # Nombre único con timestamp
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            nombre_salida = f"{empresa}_{doc.replace('.docx', '')}_{timestamp}.docx"
-            ruta_salida = os.path.join(self.parent.carpeta_salida, nombre_salida)
+            # Si el documento existe y el usuario eligió saltar
+            if existe and respuesta == "saltar":
+                continue
+            
+            # Si el documento existe y el usuario eligió renombrar
+            if existe and respuesta == "renombrar":
+                ruta_salida = self._obtener_nombre_unico(ruta_salida)
             
             try:
                 generar_documento_word(ruta_base, ruta_salida, cliente)
@@ -668,21 +707,242 @@ class PanelGenerarDocumento(ttk.Frame):
                 messagebox.showerror("Error", f"Error con {doc}: {str(e)}")
         
         # Mostrar resumen
-        mensaje = f"""
+        mensaje_resumen = f"""
         Proceso completado:
         
-        ✅ Documentos exitosos: {exitosos}
+        ✅ Documentos generados: {exitosos}
+        🔄 Documentos saltados: {ya_existentes if respuesta == "saltar" else 0}
         ❌ Documentos con error: {errores}
         📁 Carpeta: {self.parent.carpeta_salida}
         """
         
         if exitosos > 0:
-            respuesta = messagebox.askyesno("Éxito", f"{mensaje}\n\n¿Abrir carpeta?")
-            if respuesta:
+            respuesta_final = messagebox.askyesno("Éxito", f"{mensaje_resumen}\n\n¿Abrir carpeta?")
+            if respuesta_final:
                 self._abrir_carpeta_salida()
+        elif ya_existentes > 0 and respuesta == "saltar":
+            messagebox.showinfo("Información", "Todos los documentos ya existían y fueron saltados.")
         
         self.lbl_estado.config(text="Generación completada", 
-                              foreground=self.COLOR_EXITO)
+                            foreground=self.COLOR_EXITO)
+    
+    def _mostrar_dialogo_existentes(self, mensaje, cantidad_existentes):
+        """Muestra un diálogo personalizado para documentos existentes"""
+        dialogo = tk.Toplevel(self)
+        dialogo.title("⚠️ Documentos Existentes")
+        dialogo.geometry("500x400")
+        dialogo.transient(self)
+        dialogo.grab_set()
+        dialogo.resizable(False, False)
+        
+        # Centrar la ventana
+        dialogo.update_idletasks()
+        ancho = dialogo.winfo_width()
+        alto = dialogo.winfo_height()
+        x = (dialogo.winfo_screenwidth() // 2) - (ancho // 2)
+        y = (dialogo.winfo_screenheight() // 2) - (alto // 2)
+        dialogo.geometry(f'500x400+{x}+{y}')
+        
+        # Frame principal
+        main_frame = ttk.Frame(dialogo, padding=20)
+        main_frame.pack(fill="both", expand=True)
+        
+        # Header
+        frame_header = ttk.Frame(main_frame)
+        frame_header.pack(fill="x", pady=(0, 15))
+        
+        # Icono y título
+        lbl_icono = ttk.Label(frame_header,
+                            text="⚠️",
+                            font=("Segoe UI", 22),
+                            foreground="#FF9800")
+        lbl_icono.pack(side="left", padx=(0, 10))
+        
+        frame_titulo = ttk.Frame(frame_header)
+        frame_titulo.pack(side="left", fill="y")
+        
+        ttk.Label(frame_titulo,
+                 text=f"{cantidad_existentes} documento(s) ya existen",
+                 font=("Segoe UI", 12, "bold"),
+                 foreground="#2C3E50").pack(anchor="w")
+        
+        ttk.Label(frame_titulo,
+                 text="Seleccione una acción:",
+                 font=("Segoe UI", 9),
+                 foreground="#7F8C8D").pack(anchor="w", pady=(2, 0))
+        
+        # Variable para resultado
+        resultado = tk.StringVar(value="sobrescribir")
+        
+        # Frame para opciones
+        frame_opciones = ttk.Frame(main_frame)
+        frame_opciones.pack(fill="both", expand=True, pady=(0, 20))
+        
+        # Configurar columnas para mejor alineación
+        frame_opciones.columnconfigure(1, weight=1)
+        
+        # Opción 1: Sobrescribir
+        radio1 = tk.Radiobutton(frame_opciones,
+                              variable=resultado,
+                              value="sobrescribir",
+                              bg=self.COLOR_FONDO,
+                              activebackground=self.COLOR_FONDO,
+                              cursor="hand2")
+        radio1.grid(row=0, column=0, sticky="nw", padx=(0, 10), pady=(0, 15))
+        
+        lbl_opcion1 = tk.Label(frame_opciones,
+                             text="🔄  Sobrescribir existentes",
+                             font=("Segoe UI", 10, "bold"),
+                             bg=self.COLOR_FONDO,
+                             cursor="hand2")
+        lbl_opcion1.grid(row=0, column=1, sticky="w", pady=(0, 5))
+        
+        lbl_desc1 = tk.Label(frame_opciones,
+                           text="Reemplazar los documentos que ya existen",
+                           font=("Segoe UI", 9),
+                           bg=self.COLOR_FONDO,
+                           fg="#666666",
+                           cursor="hand2")
+        lbl_desc1.grid(row=1, column=1, sticky="w", padx=(0, 0), pady=(0, 10))
+        
+        # Opción 2: Renombrar
+        radio2 = tk.Radiobutton(frame_opciones,
+                              variable=resultado,
+                              value="renombrar",
+                              bg=self.COLOR_FONDO,
+                              activebackground=self.COLOR_FONDO,
+                              cursor="hand2")
+        radio2.grid(row=2, column=0, sticky="nw", padx=(0, 10), pady=(0, 15))
+        
+        lbl_opcion2 = tk.Label(frame_opciones,
+                             text="📝  Renombrar automáticamente",
+                             font=("Segoe UI", 10, "bold"),
+                             bg=self.COLOR_FONDO,
+                             cursor="hand2")
+        lbl_opcion2.grid(row=2, column=1, sticky="w", pady=(0, 5))
+        
+        lbl_desc2 = tk.Label(frame_opciones,
+                           text="Agregar números para evitar duplicados",
+                           font=("Segoe UI", 9),
+                           bg=self.COLOR_FONDO,
+                           fg="#666666",
+                           cursor="hand2")
+        lbl_desc2.grid(row=3, column=1, sticky="w", padx=(0, 0), pady=(0, 10))
+        
+        # Opción 3: Saltar
+        radio3 = tk.Radiobutton(frame_opciones,
+                              variable=resultado,
+                              value="saltar",
+                              bg=self.COLOR_FONDO,
+                              activebackground=self.COLOR_FONDO,
+                              cursor="hand2")
+        radio3.grid(row=4, column=0, sticky="nw", padx=(0, 10), pady=(0, 15))
+        
+        lbl_opcion3 = tk.Label(frame_opciones,
+                             text="⏭️  Saltar existentes",
+                             font=("Segoe UI", 10, "bold"),
+                             bg=self.COLOR_FONDO,
+                             cursor="hand2")
+        lbl_opcion3.grid(row=4, column=1, sticky="w", pady=(0, 5))
+        
+        lbl_desc3 = tk.Label(frame_opciones,
+                           text="Generar solo documentos nuevos",
+                           font=("Segoe UI", 9),
+                           bg=self.COLOR_FONDO,
+                           fg="#666666",
+                           cursor="hand2")
+        lbl_desc3.grid(row=5, column=1, sticky="w", padx=(0, 0), pady=(0, 10))
+        
+        # Funciones para seleccionar al hacer click en las etiquetas
+        def seleccionar_opcion1(e=None):
+            resultado.set("sobrescribir")
+            radio1.select()
+        
+        def seleccionar_opcion2(e=None):
+            resultado.set("renombrar")
+            radio2.select()
+        
+        def seleccionar_opcion3(e=None):
+            resultado.set("saltar")
+            radio3.select()
+        
+        # Asignar bindings a las etiquetas
+        for label in [lbl_opcion1, lbl_desc1]:
+            label.bind("<Button-1>", seleccionar_opcion1)
+        
+        for label in [lbl_opcion2, lbl_desc2]:
+            label.bind("<Button-1>", seleccionar_opcion2)
+        
+        for label in [lbl_opcion3, lbl_desc3]:
+            label.bind("<Button-1>", seleccionar_opcion3)
+        
+        # Frame para botones
+        frame_botones = ttk.Frame(main_frame)
+        frame_botones.pack(fill="x", pady=(10, 0))
+        
+        def confirmar():
+            dialogo.resultado = resultado.get()
+            dialogo.destroy()
+        
+        def cancelar():
+            dialogo.resultado = None
+            dialogo.destroy()
+        
+        # Botón principal
+        btn_continuar = ttk.Button(frame_botones,
+                                 text=f"Aplicar a {cantidad_existentes} documento(s)",
+                                 command=confirmar,
+                                 style="Primary.TButton",
+                                 width=25)
+        btn_continuar.pack(side="right", padx=(10, 0))
+        
+        # Botón cancelar
+        btn_cancelar = ttk.Button(frame_botones,
+                                text="Cancelar",
+                                command=cancelar,
+                                width=15)
+        btn_cancelar.pack(side="right")
+        
+        # Etiqueta de atajos
+        lbl_atajos = ttk.Label(frame_botones,
+                             text="Teclas: 1, 2, 3 | Enter, Esc",
+                             font=("Segoe UI", 8),
+                             foreground="gray")
+        lbl_atajos.pack(side="left", fill="y")
+        
+        # Atajos de teclado
+        dialogo.bind("<Return>", lambda e: confirmar())
+        dialogo.bind("<Escape>", lambda e: cancelar())
+        dialogo.bind("1", lambda e: seleccionar_opcion1())
+        dialogo.bind("2", lambda e: seleccionar_opcion2())
+        dialogo.bind("3", lambda e: seleccionar_opcion3())
+        
+        # Seleccionar por defecto
+        radio1.select()
+        
+        # Hacer que los radio buttons también sean clickeables en toda su área
+        for radio in [radio1, radio2, radio3]:
+            radio.bind("<Button-1>", lambda e: None)  # Ya manejan su propia selección
+        
+        # Esperar respuesta
+        dialogo.wait_window()
+        
+        return getattr(dialogo, 'resultado', None)
+    
+    def _obtener_nombre_unico(self, ruta_salida):
+        """Obtiene un nombre único para el archivo agregando un número"""
+        directorio = os.path.dirname(ruta_salida)
+        nombre_base = os.path.basename(ruta_salida)
+        nombre_sin_ext, extension = os.path.splitext(nombre_base)
+        
+        contador = 1
+        nueva_ruta = ruta_salida
+        
+        while os.path.exists(nueva_ruta):
+            nueva_ruta = os.path.join(directorio, f"{nombre_sin_ext}_{contador}{extension}")
+            contador += 1
+        
+        return nueva_ruta
     
     def _elegir_carpeta(self):
         """Elige carpeta de salida (persistente)"""

@@ -13,6 +13,7 @@ class MainWindow(tk.Tk):
         self.title("Sistema de Generación de Documentos")
         self.geometry("1100x650") # Tamaño inicial de la ventana
         self.minsize(1000, 600) # Tamaño mínimo de la ventana
+        self.geometry("+200+100") # Posición inicial de la ventana
 
         # Layout principal
         self._crear_layout()
